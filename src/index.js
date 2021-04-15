@@ -77,6 +77,9 @@ function calcRadar(e, chartInstance) {
 
 function calcPosition(e, chartInstance, datasetIndex, index, data) {
   let x, y
+  const xCategory = chartInstance.scales[scaleX].options.type === 'category';
+  const yCategory = chartInstance.scales[scale].options.type === 'category';
+
   if (e.touches) {
     x = chartInstance.scales[scaleX].getValueForPixel(e.touches[0].clientX - chartInstance.canvas.getBoundingClientRect().left)
     y = chartInstance.scales[scale].getValueForPixel(e.touches[0].clientY - chartInstance.canvas.getBoundingClientRect().top)
@@ -84,16 +87,25 @@ function calcPosition(e, chartInstance, datasetIndex, index, data) {
     x = chartInstance.scales[scaleX].getValueForPixel(e.clientX - chartInstance.canvas.getBoundingClientRect().left)
     y = chartInstance.scales[scale].getValueForPixel(e.clientY - chartInstance.canvas.getBoundingClientRect().top)
   }
+  
+  if (!xCategory) {
+    x = roundValue(x, chartInstance.options.dragDataRound)
+  
+    x = x > chartInstance.scales[scaleX].max ? chartInstance.scales[scaleX].max : x
+    x = x < chartInstance.scales[scaleX].min ? chartInstance.scales[scaleX].min : x
+  } else {
+    x = chartInstance.scales[scaleX].ticks[x];
+  }
 
-  x = roundValue(x, chartInstance.options.dragDataRound)
-  y = roundValue(y, chartInstance.options.dragDataRound)
-
-  x = x > chartInstance.scales[scaleX].max ? chartInstance.scales[scaleX].max : x
-  x = x < chartInstance.scales[scaleX].min ? chartInstance.scales[scaleX].min : x
-
-  y = y > chartInstance.scales[scale].max ? chartInstance.scales[scale].max : y
-  y = y < chartInstance.scales[scale].min ? chartInstance.scales[scale].min : y
-
+  if (!yCategory) {
+    y = roundValue(y, chartInstance.options.dragDataRound)
+  
+    y = y > chartInstance.scales[scale].max ? chartInstance.scales[scale].max : y
+    y = y < chartInstance.scales[scale].min ? chartInstance.scales[scale].min : y
+  } else {
+    y = chartInstance.scales[scale].ticks[y];
+  }
+  
   if (chartInstance.data.datasets[datasetIndex].data[index].x !== undefined && chartInstance.options.dragX) {
     data.x = x
   }
